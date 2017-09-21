@@ -7,8 +7,12 @@ var Base64={_keyStr:"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456
 
 app.use(express.static(__dirname + '/'));
 
-
 app.get('/', function (req, res) {
+    res.sendFile("/main.html",{root: __dirname});
+});
+
+
+app.get('/:any', function (req, res) {
     res.sendFile("/main.html",{root: __dirname});
 });
 

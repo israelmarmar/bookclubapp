@@ -19,26 +19,52 @@
 <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 <script src="jsonfunctions.js"></script>
 
+<script type="text/javascript">
+  		const win=window;
+
+  </script>
+
 <script type="text/babel">
+
 
 var Container = React.createClass({
  
+  getInitialState: function () {
+  var str=win.location.href;
+str=str.split("//")[1];
+str=str.split("/")[1];
+    return { 
+            page:str
+
+           };
+  },
+
+  change: function(evt){
+  var url=win.location.href;
+  var prot=url.split("//")[0];
+  url=url.split("//")[1];
+  url=url.split("/")[0];
+  win.location.href=prot+"//"+url+"/"+evt.target.id;
+  	this.setState({ page: evt.target.id});
+  },
+
   
   render: function () {
-     
-
+  console.log(this.state.page);
           return (
           <div className="container">
           	 <div className="navbar">
 <h3>BookClub</h3>
 <div id="btnsnav">
-<div className="btnnav" id="mypolls"><a href="/signup">Sign up</a></div>
-<div className="btnnav" id="newpoll"><a href="/newpoll">Login</a></div>
-<div className="btnnav" id="home"><a href="/">Home</a></div>
+<div className="btnnav" onClick={this.change} id="signup">Sign up</div>
+<div className="btnnav" onClick={this.change} id="newpoll">Login</div>
+<div className="btnnav" onClick={this.change} id="home">Home</div>
 </div>
 </div>
 
-          <div className="header"><h2>BookClub</h2><img className="icon" src="book-outline.png" width="100" height="100" /></div>
+{() => {
+          if(this.state.page==""){
+          return<div className="container"><div className="header"><h2>BookClub</h2><img className="icon" src="book-outline.png" width="100" height="100" /></div>
   
 <div className="page">
 
@@ -46,7 +72,9 @@ var Container = React.createClass({
 <div className="feat">Exchange books</div>
 <div className="feat">Personal dashboard</div>
 
-</div>
+</div></div>
+}
+}()}
           </div>
 		
 		)
@@ -56,10 +84,11 @@ var Container = React.createClass({
 });
 
 ReactDOM.render(<Container/>, document.getElementById('container'));
-	
-</script>
+var str=win.location.href;
+str=str.split("//")[1];
+str=str.split("/")[1];
 
-  
+</script>
 
   
 <div id="container"></div>
