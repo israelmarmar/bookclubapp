@@ -1,15 +1,28 @@
 .page{
-
+    display:flex;
+      flex-direction: column;
+        align-items: center;
     text-align: center;
     padding-top: 100px;
-    padding-right: 110px;
+    
     padding-bottom: 100px;
-    padding-left: 170px;
-    width:65%;
-  background-color:black;
+    
+    width:85%;
+    background-color:black;
 
-  font-family: Monospace;
+}
 
+.feat{
+font-size: 18px;
+    color: #428bca;
+  margin-right: 2px;
+    line-height: 1.42857143;
+    border: 1px solid transparent;
+    border-radius: 4px 4px 0 0
+}
+.feat:hover{
+background-color: #e6e6e6;
+cursor:default;
 }
 
 h1{
@@ -31,6 +44,11 @@ font-family: Helvetica, Arial, sans-serif;
   font-size:60px;
 }
 
+h3{
+margin-left: 120px;
+margin-bottom: -15px;
+}
+
 
 body {
     display:flex;
@@ -42,6 +60,25 @@ body {
     color: #333;
     background-color: #fff;
     margin:auto;
+}
+
+.container{
+  display:flex;
+      flex-direction: column;
+        align-items: center;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #333;
+    background-color: #fff;
+    margin:auto;
+
+}
+
+ #container{
+
+    width:100%;
+    height:100%;
 }
 
 a, a:link, a:visited, a:active{
@@ -93,7 +130,7 @@ label {
 display: block;
 float:right;
 padding-left: 50px;
-margin-top:15px;
+margin-top:-1px;
 }
 
 #btnsnav{
@@ -121,6 +158,10 @@ text-align:right;
   height:250px;
   background-color:blue;
 
+}
+
+.icon{
+  margin-top:-50px
 }
 
 
