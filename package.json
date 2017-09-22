@@ -8,8 +8,9 @@
     "npm": "latest"
   },
   "dependencies": {
+    "bcrypt-nodejs": "0.0.3",
     "express": "^4.15.4",
-    "mongodb": "^2.2.31",
+    "mongoose": "^4.11.12",
     "request": "^2.81.0"
   },
   "scripts": {
