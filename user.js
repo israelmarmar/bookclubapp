@@ -1,6 +1,8 @@
 var mongodb= require("mongoose");
-var urldb =process.env.MONGOLAB_URI || 'mongodb://urlshort:78292725@ds127993.mlab.com:27993/israelmarmar';
+var urldb =process.env.MONGOLAB_URI2;
 mongodb.connect(urldb);   
+var Schema = mongodb.Schema;
+var bcrypt = require('bcrypt-nodejs');
 
 var db = mongodb.connection;
  
@@ -12,8 +14,7 @@ db.once('open', function(){
     console.log('Connection to DB successful');
 });
 
-var Schema = mongodb.Schema;
-var bcrypt = require('bcrypt-nodejs');
+
 
 var userSchema = Schema({
   email: String,
