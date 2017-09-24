@@ -6,9 +6,8 @@
   <meta charset="UTF-8">
    <title>Book club</title>
    <link rel="stylesheet" type="text/css" href="styles.css">
-
-
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+   
 </head>
 
 <body translate="no" >
@@ -17,13 +16,24 @@
 <script src="https://fb.me/react-dom-0.14.3.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
 
-
-<script type="text/javascript">
-  		const win=window;
-
-  </script>
-
 <script type="text/babel">
+
+function getCookie(cname) {
+    var name = cname + "=";
+    var decodedCookie = decodeURIComponent(document.cookie);
+    var ca = decodedCookie.split(';');
+    for(var i = 0; i <ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
+
 var Input = React.createClass({
 
   getInitialState: function() {
@@ -54,7 +64,7 @@ render: function () {
 var Container = React.createClass({
  
   getInitialState: function () {
-  var str=win.location.href;
+  var str=window.location.href;
 str=str.split("//")[1];
 str=str.split("/")[1];
     return { 
@@ -65,8 +75,13 @@ str=str.split("/")[1];
 
   change: function(evt){
 
- win.history.pushState("", evt.target.value, "/"+evt.target.id);
+ window.history.pushState("", evt.target.value, "/"+evt.target.id);
   	this.setState({ page: evt.target.id});
+  },
+  
+  logout: function(evt){
+
+ window.location.href="/logout";
   },
   
   render: function () {
@@ -77,7 +92,15 @@ str=str.split("/")[1];
 <h3>BookClub</h3>
 <div id="btnsnav">
 <div className="btnnav" onClick={this.change} id="signup">Sign up</div>
-<div className="btnnav" onClick={this.change} id="login">Login</div>
+
+{() => {
+console.log(getCookie("user"));
+if(getCookie("user")=="undefined")
+return<div className="btnnav" onClick={this.change} id="login">Login</div>
+else
+return<div className="btnnav" onClick={this.logout} id="logout">Logout</div>
+
+}()}
 <div className="btnnav" onClick={this.change} id="home">Home</div>
 </div>
 </div>
@@ -97,7 +120,7 @@ str=str.split("/")[1];
 
           if(this.state.page=="login"){
        
-          return<form className="form">
+          return<form className="form" action="/signin" method="post">
 
           <div className="form-group">
 
@@ -115,7 +138,7 @@ str=str.split("/")[1];
           </form>
           }else if(this.state.page=="signup"){
           
-          return<form className="form" action="/action_post" method="post">
+          return<form className="form" action="/register" method="post">
 
           
           <Input type="text" id="name" name="name" placeholder="Full name" value="" className="form-control" />
