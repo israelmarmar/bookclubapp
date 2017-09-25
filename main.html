@@ -7,6 +7,7 @@
    <title>Book club</title>
    <link rel="stylesheet" type="text/css" href="styles.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
    
 </head>
 
@@ -15,8 +16,10 @@
 <script src="https://fb.me/react-0.14.3.js"></script>
 <script src="https://fb.me/react-dom-0.14.3.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 
 <script type="text/babel">
+
 
 function getCookie(cname) {
     var name = cname + "=";
@@ -37,7 +40,7 @@ function getCookie(cname) {
 var Input = React.createClass({
 
   getInitialState: function() {
-    return {value: ''};
+    return {value: this.props.value};
   },
 
   handleChange: function(event) {
@@ -85,29 +88,67 @@ str=str.split("/")[1];
   },
   
   render: function () {
+
+  $(function() {
+         
+   console.log("oi");
+
+    $("button#change.btn.btn-success").on("click", function() {
+    console.log(oi);
+    });    
+
+  });
+
+  var user=getCookie("user");
+
   console.log(this.state.page);
           return (
-          <div className="container">
+          <div className="cont">
           	 <div className="navbar">
 <h3>BookClub</h3>
+
 <div id="btnsnav">
-<div className="btnnav" onClick={this.change} id="signup">Sign up</div>
 
 {() => {
-console.log(getCookie("user"));
-if(getCookie("user")=="undefined")
+
+if(user=="undefined")
+return<div className="btnnav" onClick={this.change} id="signup">Sign up</div>
+}()}
+
+{() => {
+console.log(user);
+
+if(user=="undefined")
 return<div className="btnnav" onClick={this.change} id="login">Login</div>
 else
 return<div className="btnnav" onClick={this.logout} id="logout">Logout</div>
 
+
 }()}
+
+{() => {
+if(user!=="undefined")
+return<div className="btnnav" onClick={this.change} id="settings">Settings</div>
+}()}
+
+{() => {
+if(user!=="undefined")
+return<div className="btnnav" onClick={this.change} id="books">Books</div>
+}()}
+
+{() => {
+if(user!=="undefined")
+return<div className="btnnav" onClick={this.change} id="dashboard">Dashboard</div>
+}()}
+
+
 <div className="btnnav" onClick={this.change} id="home">Home</div>
 </div>
 </div>
 
 {() => {
           if(this.state.page=="" || this.state.page=="home"){
-          return<div className="container"><div className="header"><h2>BookClub</h2><img className="icon" src="book-outline.png" width="100" height="100" /></div>
+          return<div className="cont"><div className="header"><h2>BookClub</h2><img className="icon" src="book-outline.png" width="100" height="100" /></div>
   
 <div className="page">
 
@@ -122,14 +163,14 @@ return<div className="btnnav" onClick={this.logout} id="logout">Logout</div>
        
           return<form className="form" action="/signin" method="post">
 
-          <div className="form-group">
+          <div id="log" className="form-group">
 
-          <Input type="email" name="email" placeholder="Email" value="" id="form-email" className="form-control" />
+          <input type="email" name="email" placeholder="Email" id="form-email1" className="form-control" />
           </div>
 
           <div className="form-group">
 
-         <Input type="password" placeholder="Password" className="form-control"
+         <Input type="password" placeholder="Password" value="" className="form-control"
            name="password" />
        </div>
        <button type="submit" className="btn btn-primary">
@@ -140,23 +181,65 @@ return<div className="btnnav" onClick={this.logout} id="logout">Logout</div>
           
           return<form className="form" action="/register" method="post">
 
-          
+          <div id="reg" className="form-group">
           <Input type="text" id="name" name="name" placeholder="Full name" value="" className="form-control" />
-          
-          <div className="form-group">
-
-          <Input type="email" name="email" placeholder="Email" value="" className="form-control" />
           </div>
 
           <div className="form-group">
 
-         <Input type="password" placeholder="Password" className="form-control"
+          <input type="email" name="email" placeholder="Email" className="form-control" />
+          </div>
+
+          <div className="form-group">
+
+         <input type="password" placeholder="Password" className="form-control"
            name="password" />
        </div>
-       <button type="submit" className="btn btn-primary">
+       <button type="submit" data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Processing Order" className="btn btn-primary">
           Registrer
        </button>
           </form>
+          }else if(this.state.page=="settings" && user!=="undefined"){
+          
+          return(<div>
+          <form className="form" action="/update" method="post">
+          <h2 style={{color:"black!important"}}>Update profile</h2>
+          <div className="form-group">
+          <Input type="text" id="name" name="name" placeholder="Full name" value={user} className="form-control" />
+          </div>
+
+          <div className="form-group">
+          <input type="text" name="country" placeholder="Country" className="form-control" />
+          </div>
+
+          <div className="form-group">
+          <input type="text" name="town" placeholder="Town" className="form-control" />
+          </div>
+
+       <button type="submit" className="btn btn-success">
+          Update
+       </button>
+          </form>
+          <form className="form" action="/changepass" method="post">
+
+          <h2 style={{color:"black!important"}}>Change password</h2>
+
+          <div className="form-group">
+         <input type="password" placeholder="old password" className="form-control"
+           name="oldpassword" />
+          </div>
+
+          <div className="form-group">
+         <input type="password" placeholder="new password" className="form-control"
+           name="newpassword" />
+          </div>
+
+       
+          </form>
+          <button type="submit" id="change" data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Processing Order" className="btn btn-success">
+          Change
+       </button>
+          </div>)
           }
 }()}
           </div>
@@ -167,12 +250,12 @@ return<div className="btnnav" onClick={this.logout} id="logout">Logout</div>
   
 });
 
-ReactDOM.render(<Container/>, document.getElementById('container'));
+ReactDOM.render(<Container />, document.getElementById('cont'));
 
 </script>
 
   
-<div id="container"></div>
+<div id="cont"></div>
 
 </body>
 </html>

@@ -53,10 +53,13 @@ var new_user = new User({
   new_user.password = new_user.generateHash(req.body.password);
   new_user.save(function(err, data){
     if(err) console.log(error);
-    else console.log ('Success:' , data)});
+    else console.log ('Success:' , data);
 
   console.log("registrado");
+  req.session.user=data.name;
   res.redirect("/");
+
+  })
 });
 
 app.post('/signin', function(req, res) {
