@@ -19,7 +19,9 @@ db.once('open', function(){
 var userSchema = Schema({
   email: String,
   name: String,
-  password: String
+  password: String,
+  country: String,
+  town: String
 });
 
 

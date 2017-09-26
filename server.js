@@ -7,6 +7,15 @@ var User = require('./user.js');
 var cookieParser = require('cookie-parser');
 var session=require('express-session');
 
+function clone(obj) {
+var copy={};
+  console.log(obj._doc)
+    Object.keys(obj._doc).forEach(function (key) {
+    copy[key]=obj[key];
+    }   );
+    console.log(copy);
+    return copy;
+}
 app.use(bodyParser.json());
 
 //support parsing of application/x-www-form-urlencoded post data
@@ -24,7 +33,7 @@ app.use(session({
 }));
 
 app.get('/', function (req, res) {
-	res.cookie("user",req.session.user);
+	res.cookie("user",JSON.stringify(req.session.user));
     res.sendFile("/main.html",{root: __dirname});
 });
 
@@ -36,6 +45,7 @@ app.get('/logout', function (req, res) {
 
 
 app.get('/:any', function (req, res) {
+  res.cookie("user",JSON.stringify(req.session.user));
     res.sendFile("/main.html",{root: __dirname});
 });
 
@@ -56,20 +66,76 @@ var new_user = new User({
     else console.log ('Success:' , data);
 
   console.log("registrado");
-  req.session.user=data.name;
+  var usr=clone(data);
+      console.log(delete usr["password"]);
+      req.session.user=usr;
+  req.session.user=usr;
   res.redirect("/");
 
   })
 });
 
 app.post('/signin', function(req, res) {
-  User.findOne({username: req.body.username}, function(err, user) {
+  User.findOne({email: req.body.email}, function(err, user) {
 
     if (!user.validPassword(req.body.password)) {
        res.redirect("/login");
     } else {
-	req.session.user=user.name;
+      var usr=clone(user);
+      delete usr["password"];
+	    req.session.user=usr;
+
       res.redirect("/");
     }
   });
 });
+
+app.post('/update', function(req, res) {
+  var resp=res;
+
+  if(req.session.user){
+    console.log({country: req.body.country, town: req.body.town});
+    User.updateOne({email: req.session.user.email}, {country: req.body.country, town: req.body.town}, function(err, res) {
+    if (err) throw err;
+    console.log("1 document updated: ",res);
+
+    User.findOne({email: req.session.user.email}, function(err, user) {
+
+    if(user){
+    var usr=clone(user);
+      delete usr["password"];
+      req.session.user=usr;
+      resp.json(usr);
+      return;
+    }
+    });
+  });
+  }else{
+    res.json({msg:"permission denied"});
+  }
+});
+
+app.post('/changepass', function(req, res) {
+  var resp=res;
+
+
+
+  if(req.session.user){
+   User.findOne({email: req.session.user.email}, function(err, user) {
+
+    if (user.validPassword(req.body.oldpassword)) {
+       User.updateOne({email: user.email}, {password: user.generateHash(req.body.newpassword)}, function(err, res) {
+          if (err) throw err;
+
+          console.log ('Success:' , res);
+          resp.json({msg:"success"});
+
+        });
+    }else
+    resp.json({msg:"incorrect password"});
+   });
+  }else{
+    res.json({msg:"permission denied"});
+  }
+});
+

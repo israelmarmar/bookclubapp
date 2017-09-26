@@ -16,10 +16,32 @@
 <script src="https://fb.me/react-0.14.3.js"></script>
 <script src="https://fb.me/react-dom-0.14.3.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
-<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.2.0/js/bootstrap.min.js"></script>
 
 <script type="text/babel">
 
+function serialize(form) {
+    var result = [];
+    if (typeof form === 'object' && form.nodeName === 'FORM')
+        Array.prototype.slice.call(form.elements).forEach(function(control) {
+            if (
+                control.name && 
+                !control.disabled && 
+                ['file', 'reset', 'submit', 'button'].indexOf(control.type) === -1
+            )
+                if (control.type === 'select-multiple')
+                    Array.prototype.slice.call(control.options).forEach(function(option) {
+                        if (option.selected) 
+                            result.push(encodeURIComponent(control.name) + '=' + encodeURIComponent(option.value));
+                    });
+                else if (
+                    ['checkbox', 'radio'].indexOf(control.type) === -1 || 
+                    control.checked
+                ) result.push(encodeURIComponent(control.name) + '=' + encodeURIComponent(control.value));
+        });
+        return result.join('&').replace(/%20/g, '+');
+}
 
 function getCookie(cname) {
     var name = cname + "=";
@@ -86,20 +108,35 @@ str=str.split("/")[1];
 
  window.location.href="/logout";
   },
+
+  submit: function(ev){
+
+    ev.preventDefault();
+
+    var btn=ev.target.submit;
+    btn.innerHTML="<i class='fa fa-circle-o-notch fa-spin'></i>"+btn.innerHTML;
+    btn.classList.add('disabled');
+        $.ajax({
+            type: ev.target.method,
+            url: ev.target.action,
+            data: serialize(ev.target),
+            success: function (data) {
+                btn.innerHTML="Update";
+                btn.classList.remove('disabled');
+            }
+        });
+
+  },
   
   render: function () {
 
-  $(function() {
-         
-   console.log("oi");
+  if(document.cookie && getCookie("user")!=="undefined"){
+  var user=JSON.parse(getCookie("user"));
+  var username=user.name;
+  console.log(username);
+  }
 
-    $("button#change.btn.btn-success").on("click", function() {
-    console.log(oi);
-    });    
-
-  });
-
-  var user=getCookie("user");
+  
 
   console.log(this.state.page);
           return (
@@ -111,14 +148,14 @@ str=str.split("/")[1];
 
 {() => {
 
-if(user=="undefined")
+if(username==undefined)
 return<div className="btnnav" onClick={this.change} id="signup">Sign up</div>
 }()}
 
 {() => {
-console.log(user);
+console.log(username);
 
-if(user=="undefined")
+if(username===undefined)
 return<div className="btnnav" onClick={this.change} id="login">Login</div>
 else
 return<div className="btnnav" onClick={this.logout} id="logout">Logout</div>
@@ -127,17 +164,17 @@ return<div className="btnnav" onClick={this.logout} id="logout">Logout</div>
 }()}
 
 {() => {
-if(user!=="undefined")
+if(username!==undefined)
 return<div className="btnnav" onClick={this.change} id="settings">Settings</div>
 }()}
 
 {() => {
-if(user!=="undefined")
+if(username!==undefined)
 return<div className="btnnav" onClick={this.change} id="books">Books</div>
 }()}
 
 {() => {
-if(user!=="undefined")
+if(username!==undefined)
 return<div className="btnnav" onClick={this.change} id="dashboard">Dashboard</div>
 }()}
 
@@ -159,7 +196,7 @@ return<div className="btnnav" onClick={this.change} id="dashboard">Dashboard</di
 </div></div>
 }else
 
-          if(this.state.page=="login"){
+          if(this.state.page=="login" && username===undefined){
        
           return<form className="form" action="/signin" method="post">
 
@@ -177,7 +214,7 @@ return<div className="btnnav" onClick={this.change} id="dashboard">Dashboard</di
           Sign up
        </button>
           </form>
-          }else if(this.state.page=="signup"){
+          }else if(this.state.page=="signup"  && username===undefined){
           
           return<form className="form" action="/register" method="post">
 
@@ -195,32 +232,32 @@ return<div className="btnnav" onClick={this.change} id="dashboard">Dashboard</di
          <input type="password" placeholder="Password" className="form-control"
            name="password" />
        </div>
-       <button type="submit" data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Processing Order" className="btn btn-primary">
+       <button type="submit" className="btn btn-primary">
           Registrer
        </button>
           </form>
-          }else if(this.state.page=="settings" && user!=="undefined"){
+          }else if(this.state.page=="settings" && username!==undefined){
           
           return(<div>
-          <form className="form" action="/update" method="post">
+          <form className="form" action="/update" method="post" onSubmit={this.submit}>
           <h2 style={{color:"black!important"}}>Update profile</h2>
           <div className="form-group">
-          <Input type="text" id="name" name="name" placeholder="Full name" value={user} className="form-control" />
+          <Input type="text" id="name" name="name" placeholder="Full name" value={username} className="form-control" />
           </div>
 
           <div className="form-group">
-          <input type="text" name="country" placeholder="Country" className="form-control" />
+          <Input type="text" name="country" placeholder="Country" value={user.country} className="form-control" />
           </div>
 
           <div className="form-group">
-          <input type="text" name="town" placeholder="Town" className="form-control" />
+          <Input type="text" name="town" placeholder="Town" value={user.town} className="form-control" />
           </div>
 
-       <button type="submit" className="btn btn-success">
+       <button type="submit" id="submit" className="btn btn-success">
           Update
        </button>
           </form>
-          <form className="form" action="/changepass" method="post">
+          <form className="form" action="/changepass" method="post" onSubmit={this.submit}>
 
           <h2 style={{color:"black!important"}}>Change password</h2>
 
@@ -233,12 +270,11 @@ return<div className="btnnav" onClick={this.change} id="dashboard">Dashboard</di
          <input type="password" placeholder="new password" className="form-control"
            name="newpassword" />
           </div>
-
-       
-          </form>
-          <button type="submit" id="change" data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Processing Order" className="btn btn-success">
+           <button type="submit" id="submit" className="btn btn-success">
           Change
-       </button>
+       </button>       
+          </form>
+         
           </div>)
           }
 }()}
@@ -250,7 +286,12 @@ return<div className="btnnav" onClick={this.change} id="dashboard">Dashboard</di
   
 });
 
+
+
 ReactDOM.render(<Container />, document.getElementById('cont'));
+
+
+
 
 </script>
 
