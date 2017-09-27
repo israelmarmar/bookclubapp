@@ -192,4 +192,8 @@ input, button {
     letter-spacing: .1px;
 }
 
+.invisible{
+  display:none;
+}
+
 }

@@ -60,6 +60,9 @@ var new_user = new User({
     name: req.body.name
   });
 
+ User.findOne({email: req.body.email}, function(err, user) {
+
+  if(!user){
   new_user.password = new_user.generateHash(req.body.password);
   new_user.save(function(err, data){
     if(err) console.log(error);
@@ -67,25 +70,30 @@ var new_user = new User({
 
   console.log("registrado");
   var usr=clone(data);
-      console.log(delete usr["password"]);
+  delete usr["password"];
       req.session.user=usr;
   req.session.user=usr;
-  res.redirect("/");
+  res.json({type: "redirect", msg: "/"});
 
   })
+  }else{
+   res.json({type: "denied", msg: "User is already exist"}); 
+  }
+
+  });
 });
 
 app.post('/signin', function(req, res) {
   User.findOne({email: req.body.email}, function(err, user) {
 
     if (!user.validPassword(req.body.password)) {
-       res.redirect("/login");
+       res.json({type: "denied", msg: "User or password is invalid"});
     } else {
       var usr=clone(user);
       delete usr["password"];
 	    req.session.user=usr;
 
-      res.redirect("/");
+      res.json({type: "redirect", msg: "/"});
     }
   });
 });
@@ -105,13 +113,13 @@ app.post('/update', function(req, res) {
     var usr=clone(user);
       delete usr["password"];
       req.session.user=usr;
-      resp.json(usr);
+      resp.json({type: "ok", msg:"Profile updated successfully"});
       return;
     }
     });
   });
   }else{
-    res.json({msg:"permission denied"});
+    res.json({type: "denied", msg:"permission denied"});
   }
 });
 
@@ -128,14 +136,52 @@ app.post('/changepass', function(req, res) {
           if (err) throw err;
 
           console.log ('Success:' , res);
-          resp.json({msg:"success"});
+          resp.json({type:"ok", msg:"Password updated successfully"});
 
         });
     }else
-    resp.json({msg:"incorrect password"});
+    resp.json({type:"denied", msg:"Old password is invalid"});
    });
   }else{
-    res.json({msg:"permission denied"});
+    res.json({type:"denied", msg:"permission denied"});
   }
 });
+
+app.get("/gets/searchbook",function(req,res){
+
+  options = { method: 'GET',
+     "rejectUnauthorized": false, 
+  url: "https://www.googleapis.com/books/v1/volumes?q="+req.query.q};
+
+  request(options, function (error, response, body) {
+    if (error) throw new Error(error);
+
+    var jsonobj=JSON.parse(body);
+
+      res.json(jsonobj.items);
+
+    });
+    
+
+
+});
+
+app.get("/gets/addbook",function(req,res){
+options = { method: 'GET',
+     "rejectUnauthorized": false, 
+  url: "https://www.googleapis.com/books/v1/volumes?q="+req.query.q};
+
+  request(options, function (error, response, body) {
+    if (error) throw new Error(error);
+
+    var jsonobj=JSON.parse(body);
+
+      res.json({imglink: jsonobj.items[0].volumeInfo.imageLinks.thumbnail});
+
+    });
+    
+
+});
+
+
 
