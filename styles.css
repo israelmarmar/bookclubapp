@@ -196,4 +196,11 @@ input, button {
   display:none;
 }
 
+.imgbook{
+  margin-top:20px;
+  margin-right:20px;
+  width:160px;
+  height: 250px;
+}
+
 }

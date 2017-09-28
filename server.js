@@ -7,6 +7,22 @@ var User = require('./user.js');
 var cookieParser = require('cookie-parser');
 var session=require('express-session');
 
+var mongodb= require("mongoose");
+var urldb =process.env.MONGOLAB_URI2;
+  
+
+var db = mongodb.connection;
+ 
+db.on('error', function(err){
+    console.log('connection error', err);
+});
+ 
+db.once('open', function(){
+    console.log('Connection to DB successful');
+});
+
+
+
 function clone(obj) {
 var copy={};
   console.log(obj._doc)
@@ -169,17 +185,44 @@ app.get("/gets/searchbook",function(req,res){
 app.get("/gets/addbook",function(req,res){
 options = { method: 'GET',
      "rejectUnauthorized": false, 
-  url: "https://www.googleapis.com/books/v1/volumes?q="+req.query.q};
+  url: "https://www.googleapis.com/books/v1/volumes?q="+req.query.book};
 
+var resp=res;
   request(options, function (error, response, body) {
     if (error) throw new Error(error);
 
+  if(req.session.user){
     var jsonobj=JSON.parse(body);
+    var jsonobj=jsonobj.items[0].volumeInfo;
 
-      res.json({imglink: jsonobj.items[0].volumeInfo.imageLinks.thumbnail});
+    db.collection("books").insertOne({title: jsonobj.title, img: jsonobj.imageLinks.thumbnail, user:req.session.user.email}, function(err, res) {
+    if (err) throw err;
+    console.log("1 document inserted");
+    resp.json({type:"img", msg: jsonobj.imageLinks.thumbnail});
+    });
+
+    
+    }else{
+    resp.json({type:"denied", msg:"permission denied"});
+  }
 
     });
-    
+
+});
+
+app.get("/gets/userbooks",function(req,res){
+  var resp=res;
+console.log(req.query.user);
+  db.collection("books").find(req.query.user!=="undefined"?{user:req.query.user}:{}).sort({_id:-1}).toArray(function(err, res) {
+    if (err) throw err;
+    console.log(res);
+    resp.send(res);
+    });
+
+});
+
+
+app.get("/gets/request",function(req,res){
 
 });
 
