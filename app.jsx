@@ -36,6 +36,12 @@ function getCookie(cname) {
     return "";
 }
 
+if(document.cookie && getCookie("user")!=="undefined"){
+  var user=JSON.parse(getCookie("user"));
+  var username=user.name;
+  console.log(username);
+  }
+
 var Books = React.createClass({
 
   getInitialState: function() {
@@ -61,13 +67,52 @@ var Books = React.createClass({
      
   },
 
+  remove: function(e){
+    var th = this;
+    var dt=this.state.data;
+    
+
+    this.serverRequest = 
+      axios.get("/gets/remove?title="+e.target.value)
+     
+        .then(function(result) {    
+        delete dt[e.target.id];
+    th.setState({
+            data: dt,
+ 
+          });
+      
+        })
+  },
+
+  trade: function(e){
+var btn=e;
+    var th = this; 
+    this.serverRequest = 
+      axios.get("/gets/request?title="+e.target.value)
+     
+        .then(function(result) {    
+        console.log("oi");
+      btn.target.classList.add('disabled');
+        })
+  },
+
 render: function () {
 console.log(this.state.data);
+var th=this;
+
   return (
-      <div id={this.props.id} >
-  {this.state.data.map(function(item) {
-  console.log(item.img);
-          return (<img className="imgbook" src={item.img} height="42" width="42"/>)
+      <div id={this.props.id} style={{width:"80%"}}>
+  {this.state.data.map(function(item,i) {
+  var type=th.props.type=="others" && user.email!==item.user;
+  console.log(item.request);
+          return (
+          <div className="content">
+          <img className="imgbook" src={item.img} height="42" width="42"/>
+
+          <button value={item.title} id={i} onClick={type?th.trade:th.remove} className={"btn btn-default btn-sm glyphicon "+(type?"glyphicon-retweet ":"glyphicon-remove ")+(item.trade==undefined || item.trade=="" ?"":!type?"":"disabled")}/>
+
+          </div>)
       
       })}
   </div>
@@ -172,14 +217,6 @@ str=str.split("/")[1];
   },
 
   render: function () {
-
-  if(document.cookie && getCookie("user")!=="undefined"){
-  var user=JSON.parse(getCookie("user"));
-  var username=user.name;
-  console.log(username);
-  }
-
-  
 
   console.log(this.state.page);
           return (
@@ -326,21 +363,20 @@ return<div className="btnnav" onClick={this.change} id="dashboard">Dashboard</di
           console.log("dash");
 
           return(
-          <div>
+          <div className="cont">
           <form className="form" action="/gets/addbook" method="get" onSubmit={this.submit}>
           <h2 style={{color:"black!important"}}>Your Books</h2>
           <input type="text" name="book" placeholder="Add Book" className="form-control"/>
           <button type="submit" id="submit" className="btn btn-primary">Add book</button><br/>
           <img className="invisible imgbook" src="" id="imgbook" height="42" width="42" />
           </form>
+          <br />
           <Books id="books" user={user.email}/>
           </div>)
           }else if(this.state.page=="books"  && username!==undefined){
 
           return(
-          <div>
-          <Books />
-          </div>
+          <Books type="others"/>
           )
           }
 }()}

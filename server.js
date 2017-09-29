@@ -221,9 +221,38 @@ console.log(req.query.user);
 
 });
 
+app.get("/gets/remove",function(req,res){
+  var resp=res;
+  if(req.session.user){
+    db.collection("books").deleteOne({title:req.query.title}, function(err, obj) {
+    if (err) throw err;
+    db.collection("books").find({user:req.session.user}).sort({_id:-1}).toArray(function(err, res) {
+    if (err) throw err;
+    console.log(res);
+    resp.json({msg:"ok"});
+    });
+  });
+  }else{
+    res.json({type:"denied", msg:"permission denied"});
+  }
+
+});
 
 app.get("/gets/request",function(req,res){
+var resp=res;
 
+  if(req.session.user){
+  db.collection("books").findOne({title: req.query.title}, function(err, book) {
+    book.trade=req.session.user.email;
+  db.collection("books").updateOne({title: req.query.title}, book, function(err, res) {
+          if (err) throw err;
+
+          console.log("updated");
+          resp.json({type:"ok", msg:"ok"});
+
+        });
+ });
+ }
 });
 
 
