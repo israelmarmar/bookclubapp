@@ -155,8 +155,7 @@ text-align:right;
 
 .btn-danger{
   position:relative;
-  top:160px;
-  right:160px;
+  margin-left:50px;
   
 }
 
@@ -220,5 +219,7 @@ input, button {
     top:-240px!important;
     left:120px;
 }
+
+
 
 }

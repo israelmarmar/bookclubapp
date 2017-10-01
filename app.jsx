@@ -1,3 +1,5 @@
+var changebook=false;
+
 function serialize(form) {
     var result = [];
     if (typeof form === 'object' && form.nodeName === 'FORM')
@@ -42,15 +44,137 @@ if(document.cookie && getCookie("user")!=="undefined"){
   console.log(username);
   }
 
+var Books2 = React.createClass({
+	
+	getInitialState: function() {
+
+    return {data: []};
+  },
+	
+	componentDidMount: function() {
+	var th = this;
+	
+	if(this.props.type=="in"){
+    this.serverRequest = 
+      axios.get("/gets/reqbooks1")
+     
+        .then(function(result) {    
+
+          th.setState({
+            data: result.data,
+ 
+          });
+      
+        })  
+		
+	}else if(this.props.type=="out"){
+	 this.serverRequest = 
+      axios.get("/gets/reqbooks2")
+     
+        .then(function(result) {    
+
+          th.setState({
+            data: result.data,
+ 
+          });
+      
+        })  
+		
+	}
+	
+	},
+	
+	
+	render: function () {
+console.log(this.state.data);
+var th=this;
+
+  return (
+  
+      <table className="table" id={this.props.id} style={{width:"80%"}}>
+	  <thead><tr><th>Book</th><th>To</th><th></th><th></th></tr></thead>
+	  <tbody>
+  {this.state.data.map(function(item,i) {
+	
+  console.log(item.request);
+          return (
+		  <tr>
+          <td>{item.title}</td>
+		  <td>{item.trade}</td>
+		  <td><button className="btn btn-success">APPROVE</button></td>
+		  <td><button className="btn btn-success btn-danger">REJECT</button></td>
+          </tr>)
+      
+      })}
+	  </tbody>
+  </table>
+    );
+  }
+	
+});
+  
 var Books = React.createClass({
 
   getInitialState: function() {
-    return {data: []};
+  	  var str=window.location.href;
+str=str.split("//")[1];
+str=str.split("/")[1];
+    return {data: [],
+	href:str};
   },
 
+  update: function(){
+	  var str=window.location.href;
+str=str.split("//")[1];
+str=str.split("/")[1];
 
+	if(changebook)
+	{
+	changebook=false;
+	
+	var th = this;
+    this.serverRequest = 
+      axios.get("/gets/userbooks?user="+this.props.user)
+     
+        .then(function(result) {    
+
+          th.setState({
+            data: result.data,
+ 
+          });
+      
+        })  
+		
+	}else
+	
+	if(this.state.href!==str && (str=="books" || str=="dashboard"))
+	{
+	changebook=false;
+	this.setState({
+			data: [],
+            href:str
+ 
+          });
+	  var th = this;
+    this.serverRequest = 
+      axios.get("/gets/userbooks?user="+this.props.user)
+     
+        .then(function(result) {    
+
+          th.setState({
+            data: result.data,
+			href:str
+          });
+      
+        })
+	}
+	
+     },
+     
+ 
    componentDidMount: function() {
-   
+
+    this.interval = setInterval(this.update, 100);
   var th = this;
     this.serverRequest = 
       axios.get("/gets/userbooks?user="+this.props.user)
@@ -164,7 +288,9 @@ str=str.split("/")[1];
   change: function(evt){
 
  window.history.pushState("", evt.target.value, "/"+evt.target.id);
+ 
   	this.setState({ page: evt.target.id});
+	
   },
   
   logout: function(evt){
@@ -204,9 +330,7 @@ str=str.split("/")[1];
                 alert.classList.add('alert-danger');
                 }
                 else if(data.type=="img"){
-
-                ev.target.children.imgbook.classList.remove("invisible");
-                ev.target.children.imgbook.setAttribute("src",data.msg);
+				changebook=true;
                 }
 
                 btn.innerHTML=value;
@@ -360,7 +484,7 @@ return<div className="btnnav" onClick={this.change} id="dashboard">Dashboard</di
          
           </div>)
           }else if(this.state.page=="dashboard"  && username!==undefined){
-          console.log("dash");
+          console.log(user.email);
 
           return(
           <div className="cont">
@@ -372,11 +496,24 @@ return<div className="btnnav" onClick={this.change} id="dashboard">Dashboard</di
           </form>
           <br />
           <Books id="books" user={user.email}/>
+		  <h2 style={{color:"black!important"}}>Your Requests</h2>
+		  
+		  <h3 style={{color:"black!important"}}>Outcoming</h3>
+		  <Books2 type="out"/>
+		  
+		  <h3 style={{color:"black!important"}}>Incoming</h3>
+		  <Books2 type="in"/>
           </div>)
-          }else if(this.state.page=="books"  && username!==undefined){
+		  
+          }
+		  else if(this.state.page=="books"  && username!==undefined){
 
           return(
-          <Books type="others"/>
+		  <div className="cont">
+		  <h2 style={{color:"black!important"}}>All Books</h2>
+		  <p>Click the to request <i className="glyphicon-retweet"></i> a trade</p>
+          <Books id="books" type="others"/>
+		  </div>
           )
           }
 }()}

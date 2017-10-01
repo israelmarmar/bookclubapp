@@ -100,9 +100,10 @@ var new_user = new User({
 });
 
 app.post('/signin', function(req, res) {
+	
   User.findOne({email: req.body.email}, function(err, user) {
 
-    if (!user.validPassword(req.body.password)) {
+    if (!user || !user.validPassword(req.body.password)) {
        res.json({type: "denied", msg: "User or password is invalid"});
     } else {
       var usr=clone(user);
@@ -213,11 +214,43 @@ var resp=res;
 app.get("/gets/userbooks",function(req,res){
   var resp=res;
 console.log(req.query.user);
-  db.collection("books").find(req.query.user!=="undefined"?{user:req.query.user}:{}).sort({_id:-1}).toArray(function(err, res) {
+  db.collection("books").find((req.query.user!=="undefined")?{user:req.query.user}:{}).sort({_id:-1}).toArray(function(err, res) {
     if (err) throw err;
     console.log(res);
     resp.send(res);
     });
+
+});
+
+app.get("/gets/reqbooks1",function(req,res){
+  var resp=res;
+console.log(req.session.user.email);
+	if(req.session.user){
+  db.collection("books").find({trade:req.session.user.email}).sort({_id:-1}).toArray(function(err, res) {
+    if (err) throw err;
+    console.log(res);
+    resp.send(res);
+    });
+	}else{
+	 res.json({type:"denied", msg:"permission denied"});	
+	}
+
+
+});
+
+app.get("/gets/reqbooks2",function(req,res){
+  var resp=res;
+console.log(req.session.user.email);
+	if(req.session.user){
+  db.collection("books").find({user:req.session.user.email, trade: { '$exists': 1, '$ne': {}}}).sort({_id:-1}).toArray(function(err, res) {
+    if (err) throw err;
+    console.log(res);
+    resp.send(res);
+    });
+	}else{
+	 res.json({type:"denied", msg:"permission denied"});	
+	}
+
 
 });
 
