@@ -54,7 +54,7 @@ var Books2 = React.createClass({
 	componentDidMount: function() {
 	var th = this;
 	
-	if(this.props.type=="in"){
+	if(this.props.type=="out"){
     this.serverRequest = 
       axios.get("/gets/reqbooks1")
      
@@ -67,7 +67,7 @@ var Books2 = React.createClass({
       
         })  
 		
-	}else if(this.props.type=="out"){
+	}else if(this.props.type=="in"){
 	 this.serverRequest = 
       axios.get("/gets/reqbooks2")
      
@@ -84,6 +84,30 @@ var Books2 = React.createClass({
 	
 	},
 	
+  trade: function(e){
+  var th = this;
+  console.log(e.target.parentElement.parentElement);
+
+     this.serverRequest = 
+      axios.get("/gets/checkreq?title="+e.target.value+"&ap="+e.target.id)
+
+     
+        .then(function(result) {    
+
+          if(e.target.id=="approved" && result.data.msg=="ok"){
+          e.target.parentElement.parentElement.classList.add('success');
+          e.target.parentElement.parentElement.children[2].children[0].classList.add("disabled");
+          e.target.parentElement.parentElement.children[3].children[0].classList.add("disabled");
+          }
+          else{
+          if(e.target.id=="reject" && result.data.msg=="ok")
+          e.target.parentElement.parentElement.classList.add('danger');
+          e.target.parentElement.parentElement.children[2].children[0].classList.add("disabled");
+          e.target.parentElement.parentElement.children[3].children[0].classList.add("disabled");
+          }
+
+        })  
+  },
 	
 	render: function () {
 console.log(this.state.data);
@@ -92,18 +116,37 @@ var th=this;
   return (
   
       <table className="table" id={this.props.id} style={{width:"80%"}}>
-	  <thead><tr><th>Book</th><th>To</th><th></th><th></th></tr></thead>
+	  <thead><tr><th>Book</th><th>{this.props.type=="in"?"From":"To"}</th><th>{th.props.type=="out"?"Status":""}</th><th></th></tr></thead>
 	  <tbody>
   {this.state.data.map(function(item,i) {
 	
   console.log(item.request);
           return (
-		  <tr>
+		  <tr className={(item.tradeap)?(item.tradeap=="true"?"success":"danger"):""}>
           <td>{item.title}</td>
-		  <td>{item.trade}</td>
-		  <td><button className="btn btn-success">APPROVE</button></td>
-		  <td><button className="btn btn-success btn-danger">REJECT</button></td>
-          </tr>)
+		  <td>{th.props.type=="out"?item.user:item.trade}</td>
+
+      {() => {
+		  if(th.props.type=="in")
+      return<td><button onClick={th.trade} value={item.title} id="approved" className={"btn btn-success "+((item.tradeap)?"disabled":"")}>APPROVE</button></td>
+
+      }()}
+
+
+      {() => {
+      if(th.props.type=="in")
+		  return<td><button  onClick={th.trade} value={item.title} id="reject" className={"btn btn-success btn-danger "+((item.tradeap)?"disabled":"")}>REJECT</button></td>
+
+      }()}
+
+      {() => {
+      if(th.props.type=="out")
+      return<td>{(item.tradeap)?(item.tradeap=="true"?"approved":"rejected"):"pending"}</td>
+
+      }()}
+
+
+      </tr>)
       
       })}
 	  </tbody>
@@ -192,28 +235,26 @@ str=str.split("/")[1];
   },
 
   remove: function(e){
+  console.log(e.target);
     var th = this;
     var dt=this.state.data;
     
 
     this.serverRequest = 
-      axios.get("/gets/remove?title="+e.target.value)
+      axios.get("/gets/remove?title="+e.target.value+"&user="+e.target.id)
      
         .then(function(result) {    
-        delete dt[e.target.id];
-    th.setState({
-            data: dt,
- 
-          });
+        changebook=true;
       
         })
   },
 
   trade: function(e){
+
 var btn=e;
     var th = this; 
     this.serverRequest = 
-      axios.get("/gets/request?title="+e.target.value)
+      axios.get("/gets/request?title="+e.target.value+"&user="+e.target.id)
      
         .then(function(result) {    
         console.log("oi");
@@ -234,7 +275,7 @@ var th=this;
           <div className="content">
           <img className="imgbook" src={item.img} height="42" width="42"/>
 
-          <button value={item.title} id={i} onClick={type?th.trade:th.remove} className={"btn btn-default btn-sm glyphicon "+(type?"glyphicon-retweet ":"glyphicon-remove ")+(item.trade==undefined || item.trade=="" ?"":!type?"":"disabled")}/>
+          <button value={item.title} id={item.user} onClick={type?th.trade:th.remove} className={"btn btn-default btn-sm glyphicon "+(type?"glyphicon-retweet ":"glyphicon-remove ")+(item.trade==undefined || item.trade=="" ?"":!type?"":"disabled")}/>
 
           </div>)
       
@@ -330,7 +371,7 @@ str=str.split("/")[1];
                 alert.classList.add('alert-danger');
                 }
                 else if(data.type=="img"){
-				changebook=true;
+				        changebook=true;
                 }
 
                 btn.innerHTML=value;
@@ -492,17 +533,18 @@ return<div className="btnnav" onClick={this.change} id="dashboard">Dashboard</di
           <h2 style={{color:"black!important"}}>Your Books</h2>
           <input type="text" name="book" placeholder="Add Book" className="form-control"/>
           <button type="submit" id="submit" className="btn btn-primary">Add book</button><br/>
-          <img className="invisible imgbook" src="" id="imgbook" height="42" width="42" />
+          
           </form>
           <br />
           <Books id="books" user={user.email}/>
 		  <h2 style={{color:"black!important"}}>Your Requests</h2>
 		  
+      <h3 style={{color:"black!important"}}>Incoming</h3>
+      <Books2 type="in"/>
+
 		  <h3 style={{color:"black!important"}}>Outcoming</h3>
 		  <Books2 type="out"/>
 		  
-		  <h3 style={{color:"black!important"}}>Incoming</h3>
-		  <Books2 type="in"/>
           </div>)
 		  
           }

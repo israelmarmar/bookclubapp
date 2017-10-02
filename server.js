@@ -242,7 +242,7 @@ app.get("/gets/reqbooks2",function(req,res){
   var resp=res;
 console.log(req.session.user.email);
 	if(req.session.user){
-  db.collection("books").find({user:req.session.user.email, trade: { '$exists': 1, '$ne': {}}}).sort({_id:-1}).toArray(function(err, res) {
+  db.collection("books").find({user:req.session.user.email, trade: { '$exists': 1, '$ne': {}, "$ne":""}}).sort({_id:-1}).toArray(function(err, res) {
     if (err) throw err;
     console.log(res);
     resp.send(res);
@@ -257,12 +257,12 @@ console.log(req.session.user.email);
 app.get("/gets/remove",function(req,res){
   var resp=res;
   if(req.session.user){
-    db.collection("books").deleteOne({title:req.query.title}, function(err, obj) {
+    db.collection("books").deleteOne({user: req.query.user, title:req.query.title}, function(err, obj) {
     if (err) throw err;
     db.collection("books").find({user:req.session.user}).sort({_id:-1}).toArray(function(err, res) {
     if (err) throw err;
     console.log(res);
-    resp.json({msg:"ok"});
+    resp.send({msg:"ok"});
     });
   });
   }else{
@@ -275,7 +275,7 @@ app.get("/gets/request",function(req,res){
 var resp=res;
 
   if(req.session.user){
-  db.collection("books").findOne({title: req.query.title}, function(err, book) {
+  db.collection("books").findOne({user: req.query.user, title: req.query.title}, function(err, book) {
     book.trade=req.session.user.email;
   db.collection("books").updateOne({title: req.query.title}, book, function(err, res) {
           if (err) throw err;
@@ -288,5 +288,22 @@ var resp=res;
  }
 });
 
+app.get("/gets/checkreq",function(req,res){
+  var resp=res;
+  if(req.session.user){
+
+    db.collection("books").findOne({user: req.session.user.email, title: req.query.title}, function(err, book) {
+      book.tradeap=req.query.ap=="approved"?"true":"false";
+      db.collection("books").updateOne({user: req.session.user.email, title: req.query.title}, book, function(err, res) {
+          if (err) throw err;
+
+          console.log("updated");
+          resp.json({type:"ok", msg:"ok"});
+
+        });
+    });
+  }
+
+});
 
 
