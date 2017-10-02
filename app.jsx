@@ -112,19 +112,29 @@ var Books2 = React.createClass({
 	render: function () {
 console.log(this.state.data);
 var th=this;
-
+let type=this.props.type;
   return (
   
       <table className="table" id={this.props.id} style={{width:"80%"}}>
-	  <thead><tr><th>Book</th><th>{this.props.type=="in"?"From":"To"}</th><th>{th.props.type=="out"?"Status":""}</th><th></th></tr></thead>
+	  <thead><tr><th>Book</th><th>{type=="in"?"From":"To"}</th><th>{type=="out"?"Status":""}</th><th></th></tr></thead>
 	  <tbody>
   {this.state.data.map(function(item,i) {
-	
-  console.log(item.request);
+	var ty=th.props.type;
           return (
 		  <tr className={(item.tradeap)?(item.tradeap=="true"?"success":"danger"):""}>
-          <td>{item.title}</td>
-		  <td>{th.props.type=="out"?item.user:item.trade}</td>
+        
+      <td>{item.title}</td>
+
+      {() => {
+      if(th.props.type=="in")
+		  return<td>{item.trade}</td>
+       }()}
+
+       {() => {
+      if(th.props.type=="out")
+      return<td>{item.trade}</td>
+
+      }()}
 
       {() => {
 		  if(th.props.type=="in")
