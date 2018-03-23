@@ -9,28 +9,28 @@ var session=require('express-session');
 
 var mongodb= require("mongoose");
 var urldb =process.env.MONGOLAB_URI2;
-  
+
 
 var db = mongodb.connection;
- 
+
 db.on('error', function(err){
-    console.log('connection error', err);
+  console.log('connection error', err);
 });
- 
+
 db.once('open', function(){
-    console.log('Connection to DB successful');
+  console.log('Connection to DB successful');
 });
 
 
 
 function clone(obj) {
-var copy={};
+  var copy={};
   console.log(obj._doc)
-    Object.keys(obj._doc).forEach(function (key) {
+  Object.keys(obj._doc).forEach(function (key) {
     copy[key]=obj[key];
-    }   );
-    console.log(copy);
-    return copy;
+  }   );
+  console.log(copy);
+  return copy;
 }
 app.use(bodyParser.json());
 
@@ -50,19 +50,19 @@ app.use(session({
 
 app.get('/', function (req, res) {
 	res.cookie("user",JSON.stringify(req.session.user));
-    res.sendFile("/main.html",{root: __dirname});
+  res.sendFile("/main.html",{root: __dirname});
 });
 
 app.get('/logout', function (req, res) {
 	req.session.destroy();
 	res.clearCookie('user');
-    res.redirect("/");
+  res.redirect("/");
 });
 
 
 app.get('/:any', function (req, res) {
   res.cookie("user",JSON.stringify(req.session.user));
-    res.sendFile("/main.html",{root: __dirname});
+  res.sendFile("/main.html",{root: __dirname});
 });
 
 app.listen(port, function () {
@@ -71,32 +71,32 @@ app.listen(port, function () {
 
 app.post('/register', function (req, res) {
 
-var new_user = new User({
+  var new_user = new User({
     email: req.body.email,
     name: req.body.name
   });
 
- User.findOne({email: req.body.email}, function(err, user) {
+  User.findOne({email: req.body.email}, function(err, user) {
 
-  if(!user){
-  new_user.password = new_user.generateHash(req.body.password);
-  new_user.save(function(err, data){
-    if(err) console.log(error);
-    else console.log ('Success:' , data);
+    if(!user){
+      new_user.password = new_user.generateHash(req.body.password);
+      new_user.save(function(err, data){
+        if(err) console.log(error);
+        else console.log ('Success:' , data);
 
-  console.log("registrado");
-  var usr=clone(data);
-  delete usr["password"];
-      req.session.user=usr;
-  req.session.user=usr;
-  res.json({type: "redirect", msg: "/"});
+        console.log("registrado");
+        var usr=clone(data);
+        delete usr["password"];
+        req.session.user=usr;
+        req.session.user=usr;
+        res.json({type: "redirect", msg: "/"});
 
-  })
-  }else{
-   res.json({type: "denied", msg: "User is already exist"}); 
-  }
+      })
+    }else{
+     res.json({type: "denied", msg: "User is already exist"}); 
+   }
 
-  });
+ });
 });
 
 app.post('/signin', function(req, res) {
@@ -104,15 +104,15 @@ app.post('/signin', function(req, res) {
   User.findOne({email: req.body.email}, function(err, user) {
 
     if (!user || !user.validPassword(req.body.password)) {
-       res.json({type: "denied", msg: "User or password is invalid"});
-    } else {
-      var usr=clone(user);
-      delete usr["password"];
-	    req.session.user=usr;
+     res.json({type: "denied", msg: "User or password is invalid"});
+   } else {
+    var usr=clone(user);
+    delete usr["password"];
+    req.session.user=usr;
 
-      res.json({type: "redirect", msg: "/"});
-    }
-  });
+    res.json({type: "redirect", msg: "/"});
+  }
+});
 });
 
 app.post('/update', function(req, res) {
@@ -121,20 +121,20 @@ app.post('/update', function(req, res) {
   if(req.session.user){
     console.log({country: req.body.country, town: req.body.town});
     User.updateOne({email: req.session.user.email}, {country: req.body.country, town: req.body.town}, function(err, res) {
-    if (err) throw err;
-    console.log("1 document updated: ",res);
+      if (err) throw err;
+      console.log("1 document updated: ",res);
 
-    User.findOne({email: req.session.user.email}, function(err, user) {
+      User.findOne({email: req.session.user.email}, function(err, user) {
 
-    if(user){
-    var usr=clone(user);
-      delete usr["password"];
-      req.session.user=usr;
-      resp.json({type: "ok", msg:"Profile updated successfully"});
-      return;
-    }
+        if(user){
+          var usr=clone(user);
+          delete usr["password"];
+          req.session.user=usr;
+          resp.json({type: "ok", msg:"Profile updated successfully"});
+          return;
+        }
+      });
     });
-  });
   }else{
     res.json({type: "denied", msg:"permission denied"});
   }
@@ -149,107 +149,111 @@ app.post('/changepass', function(req, res) {
    User.findOne({email: req.session.user.email}, function(err, user) {
 
     if (user.validPassword(req.body.oldpassword)) {
-       User.updateOne({email: user.email}, {password: user.generateHash(req.body.newpassword)}, function(err, res) {
-          if (err) throw err;
+     User.updateOne({email: user.email}, {password: user.generateHash(req.body.newpassword)}, function(err, res) {
+      if (err) throw err;
 
-          console.log ('Success:' , res);
-          resp.json({type:"ok", msg:"Password updated successfully"});
+      console.log ('Success:' , res);
+      resp.json({type:"ok", msg:"Password updated successfully"});
 
-        });
-    }else
-    resp.json({type:"denied", msg:"Old password is invalid"});
-   });
-  }else{
-    res.json({type:"denied", msg:"permission denied"});
-  }
+    });
+   }else
+   resp.json({type:"denied", msg:"Old password is invalid"});
+ });
+ }else{
+  res.json({type:"denied", msg:"permission denied"});
+}
 });
 
 app.get("/gets/searchbook",function(req,res){
 
   options = { method: 'GET',
-     "rejectUnauthorized": false, 
-  url: "https://www.googleapis.com/books/v1/volumes?q="+req.query.q};
+  "rejectUnauthorized": false, 
+  url: "https://www.googleapis.com/books/v1/volumes?q="+req.query.q+"&country=BR",
+  proxy: process.env.HTTP_PROXY};
 
   request(options, function (error, response, body) {
     if (error) throw new Error(error);
 
     var jsonobj=JSON.parse(body);
 
-      res.json(jsonobj.items);
+    res.json(jsonobj.items);
 
-    });
-    
+  });
+
 
 
 });
 
 app.get("/gets/addbook",function(req,res){
-options = { method: 'GET',
-     "rejectUnauthorized": false, 
-  url: "https://www.googleapis.com/books/v1/volumes?q="+req.query.book};
+  options = { method: 'GET',
+  "rejectUnauthorized": false, 
+  url: "https://www.googleapis.com/books/v1/volumes?q="+req.query.book+"&country=BR",
+  proxy: process.env.HTTP_PROXY};
 
-var resp=res;
+  var resp=res;
   request(options, function (error, response, body) {
     if (error) throw new Error(error);
 
-  if(req.session.user){
-    var jsonobj=JSON.parse(body);
-    var jsonobj=jsonobj.items[0].volumeInfo;
+    if(req.session.user){
+      var jsonobj=JSON.parse(body);
+      console.log(jsonobj)
 
-    db.collection("books").insertOne({title: jsonobj.title, img: jsonobj.imageLinks.thumbnail, user:req.session.user.email}, function(err, res) {
-    if (err) throw err;
-    console.log("1 document inserted");
-    resp.json({type:"img", msg: jsonobj.imageLinks.thumbnail});
-    });
+      var jsonobj=jsonobj.items[0].volumeInfo;
 
-    
+      db.collection("books").insertOne({title: jsonobj.title, img: jsonobj.imageLinks.thumbnail, user:req.session.user.email}, function(err, res) {
+        if (err) throw err;
+        console.log("1 document inserted");
+        resp.json({type:"img", msg: {title: jsonobj.title,  img: jsonobj.imageLinks.thumbnail, user:req.session.user.email}});
+      });
+
+
     }else{
-    resp.json({type:"denied", msg:"permission denied"});
-  }
+      resp.json({type:"denied", msg:"permission denied"});
+    }
 
-    });
+  });
 
 });
 
 app.get("/gets/userbooks",function(req,res){
   var resp=res;
-console.log(req.query.user);
+  console.log(req.query.user);
   db.collection("books").find((req.query.user!=="undefined")?{user:req.query.user}:{}).sort({_id:-1}).toArray(function(err, res) {
     if (err) throw err;
     console.log(res);
     resp.send(res);
-    });
+  });
 
 });
 
 app.get("/gets/reqbooks1",function(req,res){
   var resp=res;
-console.log(req.session.user.email);
-	if(req.session.user){
-  db.collection("books").find({trade:req.session.user.email}).sort({_id:-1}).toArray(function(err, res) {
-    if (err) throw err;
-    console.log(res);
-    resp.send(res);
+  console.log(req.session.user.email);
+  if(req.session.user){
+    db.collection("books").find({trade:req.session.user.email}).sort({_id:-1}).toArray(function(err, res) {
+      if (err) throw err;
+      console.log(res);
+      resp.send(res);
     });
-	}else{
-	 res.json({type:"denied", msg:"permission denied"});	
-	}
+  }else{
+    res.json({type:"denied", msg:"permission denied"});	
+  }
 
 
 });
 
 app.get("/gets/reqbooks2",function(req,res){
   var resp=res;
-console.log(req.session.user.email);
-	if(req.session.user){
-  db.collection("books").find({user:req.session.user.email, trade: { '$exists': 1, '$ne': {}, "$ne":""}}).sort({_id:-1}).toArray(function(err, res) {
-    if (err) throw err;
-    console.log(res);
-    resp.send(res);
+  console.log(req.session.user.email);
+  if(req.session.user){
+    db.collection("books").find({user:req.session.user.email, trade: { '$exists': 1, '$ne': {}, "$ne":""}}).sort({_id:-1}).toArray(function(err, res) {
+      if (err) throw err;
+      console.log(res);
+      resp.send(res);
     });
-	}else{
-	 res.json({type:"denied", msg:"permission denied"});	
-	}
+  }else{
+    res.json({type:"denied", msg:"permission denied"});	
+  }
 
 
 });
@@ -258,13 +262,13 @@ app.get("/gets/remove",function(req,res){
   var resp=res;
   if(req.session.user){
     db.collection("books").deleteOne({user: req.query.user, title:req.query.title}, function(err, obj) {
-    if (err) throw err;
-    db.collection("books").find({user:req.session.user}).sort({_id:-1}).toArray(function(err, res) {
-    if (err) throw err;
-    console.log(res);
-    resp.send({msg:"ok"});
+      if (err) throw err;
+      db.collection("books").find({user:req.session.user}).sort({_id:-1}).toArray(function(err, res) {
+        if (err) throw err;
+        console.log(res);
+        resp.send({msg:"ok"});
+      });
     });
-  });
   }else{
     res.json({type:"denied", msg:"permission denied"});
   }
@@ -272,20 +276,20 @@ app.get("/gets/remove",function(req,res){
 });
 
 app.get("/gets/request",function(req,res){
-var resp=res;
+  var resp=res;
 
   if(req.session.user){
-  db.collection("books").findOne({user: req.query.user, title: req.query.title}, function(err, book) {
-    book.trade=req.session.user.email;
-  db.collection("books").updateOne({title: req.query.title}, book, function(err, res) {
-          if (err) throw err;
+    db.collection("books").findOne({user: req.query.user, title: req.query.title}, function(err, book) {
+      book.trade=req.session.user.email;
+      db.collection("books").updateOne({title: req.query.title}, book, function(err, res) {
+        if (err) throw err;
 
-          console.log("updated");
-          resp.json({type:"ok", msg:"ok"});
+        console.log("updated");
+        resp.json({type:"ok", msg:"ok"});
 
-        });
- });
- }
+      });
+    });
+  }
 });
 
 app.get("/gets/checkreq",function(req,res){
@@ -295,14 +299,18 @@ app.get("/gets/checkreq",function(req,res){
     db.collection("books").findOne({user: req.session.user.email, title: req.query.title}, function(err, book) {
       book.tradeap=req.query.ap=="approved"?"true":"false";
       db.collection("books").updateOne({user: req.session.user.email, title: req.query.title}, book, function(err, res) {
-          if (err) throw err;
+        if (err) throw err;
 
-          console.log("updated");
-          resp.json({type:"ok", msg:"ok"});
+        console.log("updated");
+        resp.json({type:"ok", msg:"ok"});
 
-        });
+      });
     });
   }
+
+});
+
+app.get("/photos",function(req,res){
 
 });
 

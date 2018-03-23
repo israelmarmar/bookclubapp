@@ -1,27 +1,11 @@
-@media (min-width: 1200px)
-.cont {
-    width: 100%;
-    height:100%;
-}
-
-@media (min-width: 1200px)
-#cont {
-    width: 100%;
-    height:100%;
-}
-
 .page{
     display:flex;
-      flex-direction: column;
-        align-items: center;
+    flex-direction: column;
+    align-items: center;
     text-align: center;
     padding-top: 100px;
-    
     padding-bottom: 100px;
-    
-    width:85%;
     background-color:black;
-
 }
 
 .feat{
@@ -47,27 +31,16 @@ h1{
   
 }
 
-@media only screen and (min-width : 1200px) {
-
 h2{
 
 font-family: Helvetica, Arial, sans-serif;
 
   top:10% !important;
-  color:white !important;
+  color:black !important;
   font-size:60px !important;
 }
 
-h3{
-margin-left: 120px;
-margin-bottom: -15px !important;
-}
-
-
 body {
-    display:flex;
-      flex-direction: column;
-        align-items: center;
     font-family: Helvetica, Arial, sans-serif;
     font-size: 14px;
     line-height: 1.42857143;
@@ -77,9 +50,6 @@ body {
 }
 
 .cont{
-  display:flex;
-      flex-direction: column;
-        align-items: center;
     font-family: Helvetica, Arial, sans-serif;
     font-size: 14px;
     line-height: 1.42857143;
@@ -88,7 +58,6 @@ body {
     margin:auto;
     width: 100%;
     height:100%;
-
 }
 
 #cont {
@@ -114,15 +83,10 @@ font-family: sans-serif;
 
 .navbar{
   
-  width:100%;
-  
-  
 background-color: #e6e6e6;
 
-
-  height:55px;
-  padding-bottom: 18px!important;
-   margin-bottom: 0px!important;
+padding:0px 0px;
+margin-bottom: 0px!important;
 
 }
 
@@ -136,21 +100,14 @@ label {
 
 .btnnav{
 
-display: block;
 float:right;
-padding-left: 20px;
-margin-top:-13px;
-cursor:pointer;
+padding-left: 50px;
 }
 
 #btnsnav{
-  position:relative;
-
- left:60%;
-
-width:500px;
-
-text-align:right; 
+float: left!important;
+list-style: none;
+margin-bottom:0px;
 }
 
 .btn-danger{
@@ -220,6 +177,14 @@ input, button {
     left:120px;
 }
 
+a:after {
+    content: "";
+    display: inline-block;
+    background: url("icon-external.jpg") no-repeat top right;
+    width: 14px;
+    height: 12px;
+}
 
-
+.headertitle{
+color:white!important;
 }
