@@ -29,7 +29,7 @@ module.exports = {
                             loader: 'extract-loader'
                         },
                         {
-                            loader: 'css-loader'
+                            loader: 'css-loader', options: { minimize: true }
                         },
                         {
                             loader: 'sass-loader'
